@@ -8,10 +8,10 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Configuration.GetValue<bool>("Database:SeedOnStartup"))
-{
-    await app.Services.SeedDatabaseAsync(app.Lifetime.ApplicationStopping);
-}
+await app.Services.InitializeDatabaseAsync(
+    applyMigrations: app.Configuration.GetValue<bool>("APPLY_MIGRATIONS"),
+    seedInitialData: app.Configuration.GetValue<bool>("Database:SeedOnStartup"),
+    cancellationToken: app.Lifetime.ApplicationStopping);
 
 if (app.Environment.IsDevelopment())
 {

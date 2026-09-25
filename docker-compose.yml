@@ -1,0 +1,42 @@
+name: conference-room-booking
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ConferenceRoomBooking.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: 'Server=mysql;Port=3306;Database=${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env};User=${MYSQL_USER:?Set MYSQL_USER in .env};Password="${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}";'
+      APPLY_MIGRATIONS: "${APPLY_MIGRATIONS:-false}"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+        restart: true
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: "${MYSQL_DATABASE:?Set MYSQL_DATABASE in .env}"
+      MYSQL_USER: "${MYSQL_USER:?Set MYSQL_USER in .env}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$${MYSQL_PASSWORD}" mysql --protocol=TCP --host=127.0.0.1 --user="$${MYSQL_USER}" --database="$${MYSQL_DATABASE}" --execute="SELECT 1" --silent'
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

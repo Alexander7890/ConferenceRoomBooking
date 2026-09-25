@@ -1,0 +1,15 @@
+**/.git
+**/.idea
+**/.vs
+**/bin
+**/obj
+**/TestResults
+**/.env
+**/.env.*
+**/secrets.json
+**/secrets
+**/.secrets
+**/*.user
+**/*.suo
+**/*.pfx
+**/*.p12
