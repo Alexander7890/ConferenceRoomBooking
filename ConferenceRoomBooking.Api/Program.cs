@@ -8,6 +8,11 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:SeedOnStartup"))
+{
+    await app.Services.SeedDatabaseAsync(app.Lifetime.ApplicationStopping);
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
