@@ -6,11 +6,17 @@ namespace ConferenceRoomBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/rooms")]
-public sealed class RoomsController(IConferenceRoomService roomService) : ControllerBase
+public sealed class RoomsController(
+    IConferenceRoomService roomService, IAvailabilityService availabilityService) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ConferenceRoomResponse>>> GetAll(CancellationToken cancellationToken)
         => Ok(await roomService.GetAllAsync(cancellationToken));
+
+    [HttpGet("available")]
+    public async Task<ActionResult<IReadOnlyList<ConferenceRoomResponse>>> GetAvailable(
+        [FromQuery] RoomAvailabilityRequest request, CancellationToken cancellationToken)
+        => Ok(await availabilityService.FindAsync(request, cancellationToken));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ConferenceRoomResponse>> GetById(int id, CancellationToken cancellationToken)

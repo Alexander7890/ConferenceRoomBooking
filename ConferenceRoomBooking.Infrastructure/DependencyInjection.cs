@@ -23,6 +23,10 @@ public static class DependencyInjection
 
         services.AddDbContext<AppDbContext>(options => options.UseMySQL(connectionString));
         services.AddScoped<IConferenceRoomRepository, ConferenceRoomRepository>();
+        services.AddScoped<IAvailabilityRepository, AvailabilityRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IServiceCatalog, ServiceCatalogRepository>();
         services.AddScoped<DatabaseSeeder>();
 
         return services;

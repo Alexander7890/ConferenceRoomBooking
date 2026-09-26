@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Conference Room Booking</title>
+    <link rel="stylesheet" href="/css/site.css">
+    <script src="/js/app.js" defer></script>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <a class="brand" href="/" aria-label="Conference Room Booking home">
+                <span class="brand-mark" aria-hidden="true">CR</span>
+                <span>Conference rooms<span class="brand-caption">Workspace management</span></span>
+            </a>
+            <p class="nav-label">WORKSPACE</p>
+            <nav class="tabs" role="tablist" aria-label="Dashboard sections" aria-orientation="vertical">
+                <button class="tab active" id="tab-rooms" role="tab" aria-selected="true" aria-controls="rooms-panel" data-tab="rooms"><span aria-hidden="true">01</span> Rooms</button>
+                <button class="tab" id="tab-availability" role="tab" aria-selected="false" aria-controls="availability-panel" data-tab="availability" tabindex="-1"><span aria-hidden="true">02</span> Availability</button>
+                <button class="tab" id="tab-booking" role="tab" aria-selected="false" aria-controls="booking-panel" data-tab="booking" tabindex="-1"><span aria-hidden="true">03</span> Booking</button>
+                <button class="tab" id="tab-reports" role="tab" aria-selected="false" aria-controls="reports-panel" data-tab="reports" tabindex="-1"><span aria-hidden="true">04</span> Reports</button>
+            </nav>
+            <div class="sidebar-note"><span class="status-dot" aria-hidden="true"></span> Demo workspace<p>Manage spaces. Find a time.<br>Bring people together.</p></div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header">
+                <div><p class="eyebrow">YOUR MEETING SPACE, ORGANIZED</p><h1>Conference Room Booking</h1><p class="subtitle">Conference room management and booking demo</p></div>
+                <span class="connection-status" id="connection-status" role="status">Connecting to API…</span>
+            </header>
+
+            <section class="notification" id="notification" role="status" aria-live="polite" aria-atomic="true" hidden>
+                <div><strong id="notification-title"></strong><p id="notification-detail" hidden></p><ul id="notification-errors" hidden></ul></div>
+                <button class="notification-close" id="notification-close" type="button" aria-label="Dismiss notification">×</button>
+            </section>
+
+            <section id="rooms-panel" class="panel" role="tabpanel" aria-labelledby="tab-rooms">
+                <div class="section-heading"><div><p class="eyebrow">THE SPACES</p><h2>Rooms</h2><p>Find the right setting for every meeting.</p></div><div class="button-row"><button class="button secondary" id="refresh-rooms" type="button">Refresh</button><button class="button primary" id="add-room" type="button" disabled>+ Add room</button></div></div>
+                <div class="summary-grid" aria-label="Room summary">
+                    <article class="summary-card"><span class="summary-label">Active rooms</span><strong id="room-count">—</strong><span class="summary-foot">Ready for your next meeting</span></article>
+                    <article class="summary-card"><span class="summary-label">Total capacity</span><strong id="capacity-count">—</strong><span class="summary-foot">Seats across all active rooms</span></article>
+                    <article class="summary-card accent"><span class="summary-label">A better way to meet</span><strong>Make room for ideas.</strong><span class="summary-foot">Explore availability and reserve your space.</span></article>
+                </div>
+                <div class="card table-card"><div class="card-heading"><h3>Room directory</h3><span class="muted">Rates per hour · UAH</span></div><div class="table-scroll"><table><thead><tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Capacity</th><th scope="col">Base hourly rate</th><th scope="col">Services</th><th scope="col" class="actions-heading">Actions</th></tr></thead><tbody id="rooms-body"><tr><td colspan="6" class="empty-state">Loading rooms…</td></tr></tbody></table></div></div>
+            </section>
+
+            <section id="availability-panel" class="panel" role="tabpanel" aria-labelledby="tab-availability" hidden>
+                <div class="section-heading"><div><p class="eyebrow">PLAN AHEAD</p><h2>Find available rooms</h2><p>A space that fits your team and your schedule.</p></div></div>
+                <form id="availability-form" class="card form-card">
+                    <div class="form-grid three-columns">
+                        <label>Start date/time<input id="availability-start" name="startDateTime" type="datetime-local" required step="60"></label>
+                        <label>End date/time<input id="availability-end" name="endDateTime" type="datetime-local" required step="60"></label>
+                        <label>Minimum capacity<input id="availability-capacity" name="capacity" type="number" min="1" max="2147483647" step="1" value="1" required></label>
+                    </div>
+                    <div class="form-footer"><p class="form-help">Choose a single day, between 06:00 and 23:00. All times are local venue times.</p><button class="button primary" type="submit">Find rooms</button></div>
+                </form>
+                <div class="results-heading"><h3>Available spaces</h3><span class="muted" id="availability-summary">Choose a time to see matching rooms.</span></div>
+                <div class="room-grid" id="availability-results" aria-live="polite"></div>
+            </section>
+
+            <section id="booking-panel" class="panel" role="tabpanel" aria-labelledby="tab-booking" hidden>
+                <div class="section-heading"><div><p class="eyebrow">SAVE YOUR SPOT</p><h2>Create booking</h2><p>Choose your room, set the time, and make it yours.</p></div></div>
+                <div class="booking-layout">
+                    <form id="booking-form" class="card form-card">
+                        <label>Room<select id="booking-room" name="roomId" required><option value="">Select a room</option></select></label>
+                        <div class="form-grid two-columns">
+                            <label>Start date/time<input id="booking-start" name="startDateTime" type="datetime-local" step="60" required></label>
+                            <label>End date/time<input id="booking-end" name="endDateTime" type="datetime-local" step="60" required></label>
+                        </div>
+                        <p class="form-help">Bookings are for one day, between 06:00 and 23:00. All times are local venue times.</p>
+                        <fieldset><legend>Additional services</legend><p class="form-help">Optional. Each selected service is charged once per booking.</p><div class="service-options" id="booking-services"><p class="muted">Select a room to see its services.</p></div></fieldset>
+                        <div class="form-footer"><p class="form-help">Your confirmed price will be calculated by the server.</p><button class="button primary" id="create-booking" type="submit">Create booking</button></div>
+                    </form>
+                    <aside class="card booking-receipt" id="booking-receipt" aria-live="polite">
+                        <span class="receipt-symbol" aria-hidden="true">✓</span><h3>Your booking summary</h3><p class="muted">After booking, your confirmation and final price will appear here.</p>
+                    </aside>
+                </div>
+            </section>
+
+            <section id="reports-panel" class="panel" role="tabpanel" aria-labelledby="tab-reports" hidden>
+                <div class="section-heading"><div><p class="eyebrow">THE BIG PICTURE</p><h2>Reports</h2><p>See how your spaces and services perform.</p></div></div>
+                <form id="reports-form" class="card form-card">
+                    <div class="form-grid two-columns"><label>From<input id="reports-from" name="from" type="datetime-local" step="60" required></label><label>To<input id="reports-to" name="to" type="datetime-local" step="60" required></label></div>
+                    <div class="form-footer"><p class="form-help">Includes bookings starting at or after From and before To.</p><button class="button primary" type="submit">Load reports</button></div>
+                </form>
+                <div id="reports-results" hidden>
+                    <div class="results-heading"><h3>Revenue overview</h3><span class="muted">All amounts in UAH</span></div>
+                    <div class="summary-grid"><article class="summary-card"><span class="summary-label">Total revenue</span><strong id="report-revenue">—</strong></article><article class="summary-card"><span class="summary-label">Bookings</span><strong id="report-booking-count">—</strong></article><article class="summary-card"><span class="summary-label">Average booking value</span><strong id="report-average">—</strong></article></div>
+                    <div class="card table-card report-table"><div class="card-heading"><h3>Rooms</h3></div><div class="table-scroll"><table><thead><tr><th scope="col">Room</th><th scope="col">Bookings</th><th scope="col">Booked hours</th><th scope="col">Revenue</th></tr></thead><tbody id="report-rooms-body"></tbody></table></div></div>
+                    <div class="card table-card report-table"><div class="card-heading"><h3>Services</h3></div><div class="table-scroll"><table><thead><tr><th scope="col">Service</th><th scope="col">Times selected</th><th scope="col">Revenue</th></tr></thead><tbody id="report-services-body"></tbody></table></div></div>
+                </div>
+            </section>
+            <footer class="page-footer">Conference Room Booking <span>Spaces for productive conversations.</span></footer>
+        </main>
+    </div>
+
+    <dialog id="room-dialog" aria-labelledby="room-dialog-title">
+        <div class="dialog-heading"><div><p class="eyebrow">ROOM DETAILS</p><h2 id="room-dialog-title">Add room</h2></div><button id="close-room-dialog" class="icon-button" type="button" aria-label="Close room form">×</button></div>
+        <form id="room-form">
+            <label>Name<input id="room-name" name="name" type="text" maxlength="200" required autocomplete="off" placeholder="e.g. Strategy room"></label>
+            <div class="form-grid two-columns"><label>Capacity<input id="room-capacity" name="capacity" type="number" min="1" max="2147483647" step="1" required></label><label>Base hourly rate (UAH)<input id="room-rate" name="baseHourlyRate" type="number" min="0.01" step="0.01" required></label></div>
+            <fieldset><legend>Available services</legend><p class="form-help">Choose which services can be booked with this room.</p><div class="service-options" id="room-services"></div></fieldset>
+            <div id="room-form-error" class="inline-error" role="alert" hidden></div>
+            <div class="dialog-footer"><button id="cancel-room-dialog" class="button secondary" type="button">Cancel</button><button id="save-room" class="button primary" type="submit">Create room</button></div>
+        </form>
+    </dialog>
+</body>
+</html>

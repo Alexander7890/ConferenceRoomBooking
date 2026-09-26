@@ -25,19 +25,14 @@ internal sealed class DatabaseSeeder(AppDbContext dbContext)
         await using var transaction = await dbContext.Database.BeginTransactionAsync(
             IsolationLevel.Serializable, cancellationToken);
 
-        var rooms = await AddMissingRoomsAsync(cancellationToken);
+        var createdRooms = await AddMissingRoomsAsync(cancellationToken);
         var services = await AddMissingServicesAsync(cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        foreach (var room in rooms)
+        foreach (var room in createdRooms)
         {
             foreach (var service in services)
             {
-                if (room.RoomServices.Any(roomService => roomService.ServiceId == service.Id))
-                {
-                    continue;
-                }
-
                 dbContext.RoomServices.Add(new RoomService
                 {
                     RoomId = room.Id,
@@ -54,28 +49,15 @@ internal sealed class DatabaseSeeder(AppDbContext dbContext)
 
     private async Task<List<ConferenceRoom>> AddMissingRoomsAsync(CancellationToken cancellationToken)
     {
-        var rooms = new List<ConferenceRoom>(InitialRooms.Length);
+        var createdRooms = new List<ConferenceRoom>(InitialRooms.Length);
         var createdAtUtc = DateTime.UtcNow;
 
         foreach (var (name, capacity, baseHourlyRate) in InitialRooms)
         {
-            var matches = await dbContext.ConferenceRooms
-                .Include(room => room.RoomServices)
-                .Where(room => room.Name == name)
-                .Take(2)
-                .ToListAsync(cancellationToken);
-
-            if (matches.Count > 1)
+            var exists = await dbContext.ConferenceRooms.AnyAsync(room => room.Name == name, cancellationToken);
+            if (!exists)
             {
-                throw new InvalidOperationException(
-                    $"Cannot seed conference room '{name}' because its name is not unique.");
-            }
-
-            var room = matches.SingleOrDefault();
-
-            if (room is null)
-            {
-                room = new ConferenceRoom
+                var room = new ConferenceRoom
                 {
                     Name = name,
                     Capacity = capacity,
@@ -84,12 +66,11 @@ internal sealed class DatabaseSeeder(AppDbContext dbContext)
                     CreatedAtUtc = createdAtUtc
                 };
                 dbContext.ConferenceRooms.Add(room);
+                createdRooms.Add(room);
             }
-
-            rooms.Add(room);
         }
 
-        return rooms;
+        return createdRooms;
     }
 
     private async Task<List<Service>> AddMissingServicesAsync(CancellationToken cancellationToken)
