@@ -1,4 +1,6 @@
+using ConferenceRoomBooking.Application.Interfaces;
 using ConferenceRoomBooking.Infrastructure.Persistence;
+using ConferenceRoomBooking.Infrastructure.Persistence.Repositories;
 using ConferenceRoomBooking.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,6 +22,7 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<AppDbContext>(options => options.UseMySQL(connectionString));
+        services.AddScoped<IConferenceRoomRepository, ConferenceRoomRepository>();
         services.AddScoped<DatabaseSeeder>();
 
         return services;
