@@ -8,7 +8,7 @@ API та демонстраційний вебінтерфейс для керу
 
 Для запуску встановіть:
 
-- **Git:** [офіційна сторінка встановлення](https://git-scm.com/install/).
+- **Git:** [офіційна сторінка завантаження](https://git-scm.com/install/).
 - **Docker Desktop:** [офіційна сторінка завантаження](https://www.docker.com/products/docker-desktop/).
 
 Запустіть Docker Desktop і переконайтеся, що використовуються **Linux containers**. Локально встановлювати MySQL або .NET SDK для запуску через Docker не потрібно.
