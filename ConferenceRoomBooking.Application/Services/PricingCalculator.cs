@@ -5,6 +5,7 @@ namespace ConferenceRoomBooking.Application.Services;
 
 public static class PricingCalculator
 {
+    // Split standard hours around the peak period so the rates never overlap.
     private static readonly (int StartHour, int EndHour, decimal Multiplier)[] PricePeriods =
     [
         (6, 9, 0.90m),
@@ -42,6 +43,7 @@ public static class PricingCalculator
             rentalPrice += hours * baseHourlyRate * period.Multiplier;
         }
 
+        // Round after combining all partial-hour segments; services are charged once per booking.
         return new BookingPrice(
             decimal.Round(rentalPrice, 2, MidpointRounding.AwayFromZero), servicePrices.Sum());
     }

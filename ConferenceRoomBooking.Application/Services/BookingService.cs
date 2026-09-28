@@ -89,6 +89,7 @@ public sealed class BookingService(IBookingRepository repository) : IBookingServ
             });
         }
 
+        // Snapshot the total and service prices so later price changes do not alter this booking.
         var booking = new Booking
         {
             RoomId = room.Id,

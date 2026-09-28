@@ -29,6 +29,7 @@ internal sealed class DatabaseSeeder(AppDbContext dbContext)
         var services = await AddMissingServicesAsync(cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        // Add default services only to new rooms, preserving later changes to existing rooms.
         foreach (var room in createdRooms)
         {
             foreach (var service in services)

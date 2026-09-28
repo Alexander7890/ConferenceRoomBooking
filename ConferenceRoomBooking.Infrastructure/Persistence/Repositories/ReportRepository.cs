@@ -10,6 +10,7 @@ public sealed class ReportRepository(AppDbContext dbContext) : IReportRepository
     public async Task<RevenueReportResponse> GetRevenueAsync(
         DateTime from, DateTime to, CancellationToken cancellationToken)
     {
+        // Include bookings by their start time, with an exclusive upper bound to avoid counting them twice.
         return await dbContext.Bookings
             .AsNoTracking()
             .Where(booking => booking.StartDateTime >= from && booking.StartDateTime < to)
@@ -24,6 +25,7 @@ public sealed class ReportRepository(AppDbContext dbContext) : IReportRepository
     public async Task<IReadOnlyList<RoomReportResponse>> GetRoomsAsync(
         DateTime from, DateTime to, CancellationToken cancellationToken)
     {
+        // Keep inactive rooms in historical reports and use the full saved booking total.
         return await dbContext.ConferenceRooms
             .AsNoTracking()
             .OrderBy(room => room.Id)
@@ -44,6 +46,7 @@ public sealed class ReportRepository(AppDbContext dbContext) : IReportRepository
     public async Task<IReadOnlyList<ServiceReportResponse>> GetServicesAsync(
         DateTime from, DateTime to, CancellationToken cancellationToken)
     {
+        // Revenue comes from booked prices, not the current service catalog.
         return await dbContext.Services
             .AsNoTracking()
             .OrderBy(service => service.Id)

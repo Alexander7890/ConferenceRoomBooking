@@ -90,6 +90,7 @@ public sealed class ConferenceRoomService(IConferenceRoomRepository repository) 
             return false;
         }
 
+        // Hide the room while preserving its bookings and service relations.
         room.IsActive = false;
         room.UpdatedAtUtc = DateTime.UtcNow;
         await repository.SaveChangesAsync(cancellationToken);

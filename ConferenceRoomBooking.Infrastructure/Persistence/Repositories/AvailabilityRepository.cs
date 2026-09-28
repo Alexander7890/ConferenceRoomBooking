@@ -9,6 +9,7 @@ public sealed class AvailabilityRepository(AppDbContext dbContext) : IAvailabili
     public async Task<IReadOnlyList<ConferenceRoomResponse>> FindAsync(
         DateTime startDateTime, DateTime endDateTime, int capacity, CancellationToken cancellationToken)
     {
+        // Strict overlap boundaries allow a booking to start exactly when another ends.
         return await dbContext.ConferenceRooms
             .AsNoTracking()
             .Where(room => room.IsActive && room.Capacity >= capacity)
